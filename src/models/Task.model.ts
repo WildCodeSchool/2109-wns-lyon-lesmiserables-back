@@ -10,7 +10,7 @@ import {
 } from "typeorm";
 import { CheckList } from "./CheckList.model";
 import { Label } from "./Label.model";
-import { Project } from "./project.model";
+import { Project } from "./Project.model";
 
 @ObjectType()
 @Entity()
@@ -25,9 +25,6 @@ export class Task extends BaseEntity {
 
   @ManyToOne(() => Project, (project) => project.tasks)
   project: Project;
-
-  @RelationId((project: Project) => project.id)
-  projectId: number;
 
   constructor(project: Project) {
     super();
