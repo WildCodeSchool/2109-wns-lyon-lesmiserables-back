@@ -4,7 +4,7 @@ import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { ProjectResolver } from "./resolvers/ProjectResolver";
 import { createConnection } from "typeorm";
-import { Project } from "./models/project.model";
+import { Project } from "./models/Project.model";
 import { Task } from "./models/Task.model";
 // import { TaskResolver } from "./resolvers/TaskResolver";
 
