@@ -6,7 +6,6 @@ import { ProjectResolver } from "./ProjectResolver";
 
 @Resolver(Task)
 export class TaskResolver {
-  private projectController = new ProjectResolver();
   private taskRepo = getRepository(Task);
 
   @Query(() => [Task])
@@ -14,7 +13,7 @@ export class TaskResolver {
     return await this.taskRepo.find();
   }
 
-
+ // on peut copier coller directement dans addTaskToProject
   @Mutation(() => Task)
   async addTask(
     @Arg("data", () => TaskInput) task: Task): Promise<Task> {

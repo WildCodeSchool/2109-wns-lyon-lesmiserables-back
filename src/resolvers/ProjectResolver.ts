@@ -18,7 +18,8 @@ export class ProjectResolver {
   @Query(() => Project, {nullable: true})
   async getProjectById(@Arg("id", () => ID) id: number): Promise<Project> {
     try {
-      const proj = await this.projectRepo.findOne(id);
+      // préciser la relation 
+      const proj = await this.projectRepo.findOne(id, {relations: ["tasks"]});
       if (!proj) return null;
       return proj;
     } catch (err) {
@@ -34,23 +35,20 @@ export class ProjectResolver {
     return projectTmp;
   }
 
-  // @Mutation(() => Project)
-  // async addTaskToProject(
-  //   @Arg("id", () => ID) id: number,
-  //   @Arg("data", () => TaskInput) task: Task
-  // ): Promise<Project> {
-  //   console.log('helo')
-  //   const findProject= await this.getProjectById(id);
-  //   if (findProject){
-  //     console.log(task) 
-  //    const newTask=  await this.taskController.addTask(task)
-  //      console.log(newTask)
-  //     findProject.tasks = [...findProject.tasks, newTask]
-  //     findProject.save()
-  //   }
-  //   return findProject
-
-  // }
+  @Mutation(() => Project)
+  async addTaskToProject(
+    @Arg("id", () => ID) id: number,
+    @Arg("data", () => TaskInput) task: Task
+  ): Promise<Project> {
+    console.log('helo')
+    const findProject= await this.getProjectById(id);
+    if (findProject){
+      task.project = findProject
+      const newTask = Task.create(task);
+      await newTask.save();
+    }
+    return await this.projectRepo.findOne(id);
+  }
 
   // Update
   @Mutation(() => Project)
