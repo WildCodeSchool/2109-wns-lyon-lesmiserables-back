@@ -13,7 +13,7 @@ import { Task, TaskInput } from "./Task.model";
 @Entity()
 export class Project extends BaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment")
   id: number;
 
   @Field()
@@ -74,8 +74,8 @@ export class Project extends BaseEntity {
 
 @InputType()
 export class ProjectInput {
-  @Field((type) => ID)
-  id: number;
+  // @Field((type) => ID)
+  // id: number;
 
   @Field()
   title: string;

@@ -10,7 +10,7 @@ import { Task } from "./models/Task.model";
 
 const PORT = process.env.PORT || 4000;
 
-const db = new sqlite.Database("MyDB.db");
+// const db = new sqlite.Database("MyDB.db");
 
 async function bootstrap() {
   await createConnection();

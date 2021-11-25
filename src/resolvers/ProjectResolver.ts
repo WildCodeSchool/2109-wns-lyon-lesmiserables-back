@@ -1,10 +1,10 @@
 import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
-import { Project, ProjectInput } from "../models/project.model";
+import { Project, ProjectInput } from "../models/Project.model";
 
 @Resolver(Project)
 export class ProjectResolver {
-  projectRepo = getRepository(Project);
+  private projectRepo = getRepository(Project);
 
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
@@ -22,10 +22,11 @@ export class ProjectResolver {
   //   }
   // }
 
-  // @Mutation(() => Project)
-  // addProject(@Arg("data", () => ProjectInput) project: ProjectInput): Project {
-  //   const projectWithId = { ...project, id: this.projects.length };
-  //   this.projects.push(projectWithId as Project);
-  //   return projectWithId as Project;
-  // }
+  @Mutation(() => Project)
+  async addProject(@Arg("data") project: ProjectInput): Promise<Project> {
+    console.log("ICIIIIII", project);
+    const projectTmp = Project.create(project);
+    await projectTmp.save();
+    return projectTmp;
+  }
 }
