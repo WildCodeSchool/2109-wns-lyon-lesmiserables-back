@@ -75,7 +75,7 @@ export class Task extends BaseEntity {
 
 @InputType()
 export class TaskInput {
-  @Field((type) => ID)
+  @Field((type) => ID, {nullable: true})
   id: number;
 
   @Field()

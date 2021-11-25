@@ -74,8 +74,8 @@ export class Project extends BaseEntity {
 
 @InputType()
 export class ProjectInput {
-  // @Field((type) => ID)
-  // id: number;
+  @Field((type) => ID, { nullable : true})
+  id: number;
 
   @Field()
   title: string;

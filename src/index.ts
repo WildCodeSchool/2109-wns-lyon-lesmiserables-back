@@ -4,9 +4,7 @@ import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { ProjectResolver } from "./resolvers/ProjectResolver";
 import { createConnection } from "typeorm";
-import { Project } from "./models/Project.model";
-import { Task } from "./models/Task.model";
-// import { TaskResolver } from "./resolvers/TaskResolver";
+import { TaskResolver } from "./resolvers/TaskResolver";
 
 const PORT = process.env.PORT || 4000;
 
@@ -17,7 +15,7 @@ async function bootstrap() {
 
   // ... Building schema here
   const schema = await buildSchema({
-    resolvers: [ProjectResolver],
+    resolvers: [ProjectResolver,TaskResolver],
   });
 
   // Create the GraphQL server
