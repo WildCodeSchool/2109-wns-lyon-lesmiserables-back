@@ -4,10 +4,13 @@ import {
   BaseEntity,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Task, TaskInput } from "./Task.model";
+import { UserInput, User } from "./User.model";
 
 @ObjectType()
 @Entity()
@@ -46,9 +49,19 @@ export class Project extends BaseEntity {
   @OneToMany(() => Task, (task) => task.project, {lazy:true}) // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
   tasks: Promise<Task[]>;
 
-  constructor(tasks: Promise<Task[]>) {
+
+  @ManyToMany(type => User, (user) => user.projects, {lazy:true}) 
+  @JoinTable()
+  users: Promise<User[]>
+  // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
+    
+  // user: Promise<User[]>;
+  // projects: Promise<Project[]>
+
+  constructor(tasks: Promise<Task[]>, users: Promise<User[]>) {
     super();
     this.tasks = tasks;
+    this.users= users
   }
 
   // constructor(
@@ -82,4 +95,7 @@ export class ProjectInput {
 
   @Field(() => [TaskInput], { nullable: true })
   tasks: Promise<TaskInput[]>;
+
+  @Field(() => [UserInput], { nullable: true })
+  user: Promise<UserInput[]>;
 }

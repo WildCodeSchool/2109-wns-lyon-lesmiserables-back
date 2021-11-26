@@ -5,6 +5,7 @@ import { buildSchema } from "type-graphql";
 import { ProjectResolver } from "./resolvers/ProjectResolver";
 import { createConnection } from "typeorm";
 import { TaskResolver } from "./resolvers/TaskResolver";
+import { UserResolver } from "./resolvers/UserResolver";
 
 const PORT = process.env.PORT || 4000;
 
@@ -15,7 +16,7 @@ async function bootstrap() {
 
   // ... Building schema here
   const schema = await buildSchema({
-    resolvers: [ProjectResolver,TaskResolver],
+    resolvers: [ProjectResolver,TaskResolver, UserResolver],
   });
 
   // Create the GraphQL server

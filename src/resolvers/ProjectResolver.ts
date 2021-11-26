@@ -2,6 +2,7 @@ import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
 import { Project, ProjectInput } from "../models/Project.model";
 import { Task, TaskInput } from "../models/Task.model";
+import { User, UserInput } from "../models/User.model";
 import { TaskResolver } from "./TaskResolver";
 
 @Resolver(Project)
@@ -46,6 +47,21 @@ export class ProjectResolver {
       task.project = findProject
       const newTask = Task.create(task);
       await newTask.save();
+    }
+    return await this.projectRepo.findOne(id);
+  }
+
+  @Mutation(() => Project)
+  async addUserToProject(
+    @Arg("id", () => ID) id: number,
+    @Arg("data", () => UserInput) user: User
+  ): Promise<Project> {
+    console.log('helo')
+    const findProject= await this.getProjectById(id);
+    if (findProject){
+      const newUser = User.create(user);
+      await newUser.save();
+     
     }
     return await this.projectRepo.findOne(id);
   }
