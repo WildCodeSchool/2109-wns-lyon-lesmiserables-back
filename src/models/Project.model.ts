@@ -46,19 +46,19 @@ export class Project extends BaseEntity {
   // tasks: Task[];
 
   @Field(() => [Task], { nullable: true })
-  @OneToMany(() => Task, (task) => task.project, {lazy:true}) // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
-  tasks: Promise<Task[]>;
+  @OneToMany(() => Task, (task) => task.project) // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
+  tasks: Task[];
 
-
-  @ManyToMany(type => User, (user) => user.projects, {lazy:true}) 
+  @Field(() => [User], { nullable: true })
+  @ManyToMany(type => User, (user) => user.projects) 
   @JoinTable()
-  users: Promise<User[]>
+  users: User[]
   // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
     
   // user: Promise<User[]>;
   // projects: Promise<Project[]>
 
-  constructor(tasks: Promise<Task[]>, users: Promise<User[]>) {
+  constructor(tasks: Task[], users: User[]) {
     super();
     this.tasks = tasks;
     this.users= users
@@ -94,8 +94,8 @@ export class ProjectInput {
   title: string;
 
   @Field(() => [TaskInput], { nullable: true })
-  tasks: Promise<TaskInput[]>;
+  tasks: TaskInput[];
 
   @Field(() => [UserInput], { nullable: true })
-  user: Promise<UserInput[]>;
+  user: UserInput[];
 }

@@ -13,6 +13,7 @@ export class User extends BaseEntity {
   @Column()
   username: string;
 
+  @Field(() => [Project], { nullable: true })
   @ManyToMany(() => Project, project => project.users)
   @JoinTable()
   projects: Project[];
