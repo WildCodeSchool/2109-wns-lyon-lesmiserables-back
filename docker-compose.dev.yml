@@ -1,0 +1,8 @@
+services:
+  server:
+    build: dochugoker/server
+    ports:
+      - 4040:4000
+    command: npm start
+    volumes:
+      - ./server/src/:/app/src
