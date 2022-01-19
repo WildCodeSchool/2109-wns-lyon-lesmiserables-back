@@ -1,6 +1,5 @@
 import "reflect-metadata";
 const mysql = require("mysql");
-// const sqlite = require("sqlite3").verbose();
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { ProjectResolver } from "./resolvers/ProjectResolver";
@@ -11,8 +10,6 @@ import { getRepository } from "typeorm";
 import { User } from "./models/User.model";
 
 const PORT = process.env.PORT || 4000;
-
-// const db = new sqlite.Database("MyDB.db");
 
 const db = mysql.createConnection({
   host: "localhost",
