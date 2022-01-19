@@ -1,3 +1,0 @@
-services:
-  server:
-    image: dochugoker/mmserver
