@@ -1,5 +1,13 @@
 import { Field, ID, InputType, ObjectType } from "type-graphql";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Project } from "./Project.model";
 
 @ObjectType()
@@ -14,7 +22,7 @@ export class User extends BaseEntity {
   username: string;
 
   @Field(() => [Project], { nullable: true })
-  @ManyToMany(() => Project, project => project.users)
+  @ManyToMany(() => Project, (project) => project.users)
   @JoinTable()
   projects: Project[];
 
@@ -22,14 +30,12 @@ export class User extends BaseEntity {
     super();
     this.projects = projects;
   }
-
 }
-  @InputType()
-    export class UserInput {
-  @Field((type) => ID, {nullable: true})
+@InputType()
+export class UserInput {
+  @Field((type) => ID, { nullable: true })
   id: number;
 
   @Field()
   username: string;
 }
-
