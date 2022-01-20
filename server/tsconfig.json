@@ -5,6 +5,9 @@
     "lib": ["es2018", "esnext.asynciterable"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowJs": true
-  }
+    "sourceMap": true,
+    "outDir": "dist/",
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
 }

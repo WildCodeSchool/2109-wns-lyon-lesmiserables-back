@@ -6,4 +6,4 @@ COPY tsconfig.json ./
 COPY ormconfig.json ./
 COPY src src
 RUN npm run build
-CMD node ./dist/index.js
+CMD cd dist && node ./index.js

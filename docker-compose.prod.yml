@@ -2,8 +2,11 @@ version: "3"
 
 services:
   api:
+    image: dochugoker/mmserver
     build:
       context: ./server
       dockerfile: prod.dockerfile
     ports:
       - 4000:4000
+    # volumes:
+    # - ./server/dist:/app/dist
