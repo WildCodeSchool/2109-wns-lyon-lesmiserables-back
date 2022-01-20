@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: dev.dockerfile
+    ports:
+      - 4000:4000
+    command: npm start
+    volumes:
+      - ./server/src/:/app/src
