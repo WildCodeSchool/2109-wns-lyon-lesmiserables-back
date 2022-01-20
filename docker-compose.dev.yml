@@ -2,6 +2,7 @@ version: "3"
 
 services:
   server:
+    image: dochugoker/mmserver
     build:
       context: ./server
       dockerfile: dev.dockerfile
