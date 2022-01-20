@@ -11,12 +11,7 @@ import { User } from "./models/User.model";
 
 const PORT = process.env.PORT || 4000;
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root",
-  database: "mastermine",
-});
+const db = mysql.createConnection();
 
 db.connect(function (err) {
   if (err) throw err;
@@ -30,14 +25,14 @@ db.connect(function (err) {
 async function bootstrap() {
   await createConnection();
 
-  // const userRepo = getRepository(User);
-  // const user = userRepo.create({
-  //   username: "Loic Dutrou",
-  // });
-  // await userRepo.save(user).catch((err) => {
-  //   console.log("Error: ", err);
-  // });
-  // console.log("New User Saved", user);
+  const userRepo = getRepository(User);
+  const user = userRepo.create({
+    username: "Loic",
+  });
+  await userRepo.save(user).catch((err) => {
+    console.log("Error: ", err);
+  });
+  console.log("New User Saved", user);
 
   // ... Building schema here
   const schema = await buildSchema({
