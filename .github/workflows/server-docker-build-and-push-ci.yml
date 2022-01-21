@@ -35,3 +35,4 @@ jobs:
           tags: dochugoker/mmserver:latest #changer par le tag de l'hôte
           # cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache
           # cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache,mode=max
+# line for test
