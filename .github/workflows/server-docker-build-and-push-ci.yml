@@ -1,17 +1,17 @@
 name: docker-ci
 
-on: 
+on:
   push:
-    branches: 
-         - "main"
-     # tags:
+    branches:
+      - "main"
+      # tags:
       #   - 'v*'
-   # pull_request:
+    # pull_request:
     #  branches:
-     #    - 'main'
+    #    - 'main'
 
-jobs : 
-  docker : 
+jobs:
+  docker:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -31,6 +31,6 @@ jobs :
         with:
           context: ./server
           push: true
-          tags: loic6699/mastermine:latest #changer par le tag de l'hôte
-         # cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache
-         # cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache,mode=max
+          tags: dochugoker/mmserver:latest #changer par le tag de l'hôte
+          # cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache
+          # cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/mastermine:buildcache,mode=max
