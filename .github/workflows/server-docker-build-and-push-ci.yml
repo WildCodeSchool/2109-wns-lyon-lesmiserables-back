@@ -1,14 +1,14 @@
 name: docker-ci
 
 on:
-  push:
+  # push:
+  # branches:
+  # - "main"
+  # tags:
+  #   - 'v*'
+  pull_request:
     branches:
       - "main"
-      # tags:
-      #   - 'v*'
-    # pull_request:
-    #  branches:
-    #    - 'main'
 
 jobs:
   docker:
