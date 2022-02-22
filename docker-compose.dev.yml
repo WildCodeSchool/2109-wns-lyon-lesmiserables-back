@@ -8,9 +8,9 @@ services:
       dockerfile: dev.dockerfile
     ports:
       - 4000:4000
-    command: npm start
+    command: npm run start
     volumes:
-      - ./server/src/:/app/src
+      - ./server/src:/app/src
       - ./server/ormconfig.json:/app/ormconfig.json
     depends_on:
       db:
