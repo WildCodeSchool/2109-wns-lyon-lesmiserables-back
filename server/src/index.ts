@@ -36,7 +36,9 @@ async function bootstrap() {
 
   // Start the server
   const { url } = await server.listen(PORT);
-  console.log(`Server is running, GraphQL Playground available at ${url}`);
+  console.log(
+    `Server is running, GraphQL Playground available at ${url}/graphql`
+  );
 }
 
 bootstrap();

@@ -35,6 +35,14 @@ export class User extends BaseEntity {
   @JoinTable()
   projects: Project[];
 
+  @Field({ nullable: true })
+  @Column()
+  active: boolean = false;
+
+  @Field({ nullable: true })
+  @Column()
+  secretToken: string;
+
   constructor(projects: Project[]) {
     super();
     this.projects = projects;
@@ -52,7 +60,7 @@ export class UserInput {
 
   @Field()
   @IsEmail()
-  @IsEmailAlreadyExist({ message: "email already in use" })
+  // @IsEmailAlreadyExist({ message: "email already in use" })
   email: string;
 
   @Field()

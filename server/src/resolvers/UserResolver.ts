@@ -9,12 +9,15 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { getRepository } from "typeorm";
+import { DriverOptionNotSetError, getRepository } from "typeorm";
 import { User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
 import { isAuth } from "../utils/isAuth";
 import { MyContext } from "../context/MyContext";
 import { sign } from "jsonwebtoken";
+const nodemailer = require("nodemailer");
+import * as config from "../utils/config.json";
+import * as randomstring from "randomstring";
 
 @ObjectType()
 class LoginResponse {
@@ -38,12 +41,40 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async addUser(@Arg("data", () => UserInput) user: User): Promise<User> {
-    const newUser = user;
-    newUser.password = await argon2.hash(user.password);
-    const userToSave = await this.userRepo.create(newUser).save();
+  async signin(@Arg("data", () => UserInput) user: User): Promise<User> {
+    const userTmp = await this.userRepo.findOne({
+      where: { email: user.email },
+    });
 
-    return userToSave;
+    if (userTmp) {
+      throw new Error("Account already exists !");
+    }
+
+    let newUser = user;
+    newUser.password = await argon2.hash(user.password);
+    newUser.secretToken = randomstring.generate();
+    newUser.active = false;
+    await this.userRepo.create(newUser).save();
+
+    let transporter = nodemailer.createTransport(config.smtpOptions);
+
+    let mailOptions = {
+      from: "contact.mastermine@gmail.com",
+      to: "preahugo@gmail.com", //userToSave.email,
+      subject: "Hello ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: `<div><a>pppppp</a></div>`, // html body
+    };
+
+    await transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
+    return newUser;
   }
 
   @Mutation(() => LoginResponse)
@@ -57,21 +88,45 @@ export class UserResolver {
         throw new Error("No user found!");
       }
 
-      // ok okokok
+      const isValid = await argon2.verify(user.password, password);
 
-      if (await argon2.verify(user.password, password)) {
+      if (!isValid) {
+        throw new Error("Email or password incorrect !");
+      }
+
+      if (!user.active) {
+        throw new Error("Check your email.");
+      }
+
+      if (isValid) {
         return {
           accessToken: sign({ userId: user.id }, "MySecretKey", {
             expiresIn: "15m",
           }),
         };
-      } else {
-        throw new Error("Email or password incorrect !");
       }
     } catch (err) {
       console.log(err);
     }
   }
+
+  //TODO check if correct
+  // @Mutation(() => User)
+  // async verifyAccount(@Arg("data") user: User): Promise<LoginResponse> {
+  //   const { secretToken } = user;
+  //   const newUser = await this.userRepo.findOne({
+  //     where: { secretToken: secretToken },
+  //   });
+
+  //   if (!newUser) {
+  //     throw new Error("No user found");
+  //   }
+
+  //   newUser.active = true;
+  //   newUser.secretToken = "";
+  //   await newUser.save();
+  //   return;
+  // }
 
   // Get TAsk By ID
   @Query(() => User, { nullable: true })
