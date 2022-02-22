@@ -9,15 +9,13 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { DriverOptionNotSetError, getRepository } from "typeorm";
+import { getRepository } from "typeorm";
 import { User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
 import { isAuth } from "../utils/isAuth";
 import { MyContext } from "../context/MyContext";
 import { sign } from "jsonwebtoken";
-const nodemailer = require("nodemailer");
-import * as config from "../utils/config.json";
-import * as randomstring from "randomstring";
+const mailer = require("../utils/mailer");
 
 @ObjectType()
 class LoginResponse {
@@ -41,7 +39,9 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async signin(@Arg("data", () => UserInput) user: User): Promise<User> {
+  async signUp(
+    @Arg("data", () => UserInput) user: User
+  ): Promise<LoginResponse> {
     const userTmp = await this.userRepo.findOne({
       where: { email: user.email },
     });
@@ -52,38 +52,44 @@ export class UserResolver {
 
     let newUser = user;
     newUser.password = await argon2.hash(user.password);
-    newUser.secretToken = randomstring.generate();
     newUser.active = false;
-    await this.userRepo.create(newUser).save();
+    newUser.secretToken = "";
 
-    let transporter = nodemailer.createTransport(config.smtpOptions);
-
-    let mailOptions = {
-      from: "contact.mastermine@gmail.com",
-      to: "preahugo@gmail.com", //userToSave.email,
-      subject: "Hello ✔", // Subject line
-      text: "Hello world?", // plain text body
-      html: `<div><a>pppppp</a></div>`, // html body
-    };
-
-    await transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
+    const userSaved = await this.userRepo.create(newUser).save();
+    userSaved.secretToken = sign(
+      { iss: "mastermine", sub: userSaved.id },
+      "MySecretKey",
+      {
+        expiresIn: "15m",
       }
-    });
+    );
+    await userSaved.save();
 
-    return newUser;
+    const html = `Hi,
+      <br/>Thank you for registering!
+      <br/><br/>Please verify you email (only available for 15min) :
+      <br/><a href="www.google.com?token=${userSaved.secretToken} target="_blank">Here</a>
+      <br/><br/>Have a nice day!
+    `;
+
+    await mailer.sendEmail(
+      "contact.mastermine@gmail.com",
+      "preahugo@gmail.com", // userSaved.email
+      "Hello ✔",
+      html
+    );
+
+    console.log("Please check your email!");
+    return { accessToken: newUser.secretToken };
   }
 
   @Mutation(() => LoginResponse)
-  async login(
+  async signIn(
     @Arg("email") email: string,
     @Arg("password") password: string
   ): Promise<LoginResponse> {
     try {
-      const user = await this.userRepo.findOne({ where: { email: email } });
+      const user = await this.userRepo.findOne({ where: { email } });
       if (!user) {
         throw new Error("No user found!");
       }
@@ -94,14 +100,10 @@ export class UserResolver {
         throw new Error("Email or password incorrect !");
       }
 
-      if (!user.active) {
-        throw new Error("Check your email.");
-      }
-
       if (isValid) {
         return {
           accessToken: sign({ userId: user.id }, "MySecretKey", {
-            expiresIn: "15m",
+            expiresIn: "1h",
           }),
         };
       }
@@ -110,23 +112,21 @@ export class UserResolver {
     }
   }
 
-  //TODO check if correct
-  // @Mutation(() => User)
-  // async verifyAccount(@Arg("data") user: User): Promise<LoginResponse> {
-  //   const { secretToken } = user;
-  //   const newUser = await this.userRepo.findOne({
-  //     where: { secretToken: secretToken },
-  //   });
+  @Mutation(() => User)
+  async verifyAccount(@Arg("data") token: string): Promise<User> {
+    const newUser = await this.userRepo.findOne({
+      where: { secretToken: token.trim() },
+    });
 
-  //   if (!newUser) {
-  //     throw new Error("No user found");
-  //   }
+    if (!newUser) {
+      throw new Error("No user found");
+    }
 
-  //   newUser.active = true;
-  //   newUser.secretToken = "";
-  //   await newUser.save();
-  //   return;
-  // }
+    newUser.active = true;
+    newUser.secretToken = "";
+    await newUser.save();
+    return newUser;
+  }
 
   // Get TAsk By ID
   @Query(() => User, { nullable: true })
