@@ -1,8 +1,6 @@
 import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
-import { Project, ProjectInput } from "../models/Project.model";
 import { Task, TaskInput } from "../models/Task.model";
-import { ProjectResolver } from "./ProjectResolver";
 
 @Resolver(Task)
 export class TaskResolver {
@@ -16,8 +14,8 @@ export class TaskResolver {
   // on peut copier coller directement dans addTaskToProject
   @Mutation(() => Task)
   async addTask(@Arg("data", () => TaskInput) task: Task): Promise<Task> {
-    const newTask = Task.create(task);
-    await newTask.save();
+    const newTask = await Task.create(task).save();
+    console.log(newTask);
     return newTask;
   }
 

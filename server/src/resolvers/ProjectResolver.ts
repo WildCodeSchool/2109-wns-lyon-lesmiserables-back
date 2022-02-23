@@ -11,6 +11,7 @@ export class ProjectResolver {
   private projectRepo = getRepository(Project);
   private taskController = new TaskResolver();
   private userRepo = new UserResolver();
+
   // Get all projects
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
@@ -30,16 +31,22 @@ export class ProjectResolver {
     }
   }
 
-  // Add Project     Amélioration => passer en parametre l'id du user qui l'ajoute pour l'ajouter directement au projet
+  // Add Project
   @Mutation(() => Project)
   async addProject(
     @Arg("data", () => ProjectInput) project: ProjectInput,
     @Arg("idUser", () => ID) user_id: number
   ): Promise<Project> {
-    const projectTmp = Project.create(project);
+    const user = await this.userRepo.getUserById(user_id);
 
-    await projectTmp.save();
-    return projectTmp;
+    if (!user) {
+      throw new Error("No user found!");
+    }
+
+    let newProject = project;
+    newProject.managers = [user] as any;
+    const projectSaved = await this.projectRepo.create(newProject).save();
+    return projectSaved;
   }
 
   @Mutation(() => Project)
@@ -47,7 +54,6 @@ export class ProjectResolver {
     @Arg("id", () => ID) id: number,
     @Arg("data", () => TaskInput) task: Task
   ): Promise<Project> {
-    console.log("helo");
     const findProject = await this.getProjectById(id);
     if (findProject) {
       task.project = findProject;
@@ -57,25 +63,49 @@ export class ProjectResolver {
     return await this.projectRepo.findOne(id);
   }
 
+  // @Mutation(() => Project)
+  // async addUserToProject(
+  //   @Arg("idProject", () => ID) project_id: number,
+  //   @Arg("idUser", () => ID) user_id: number
+  // ): Promise<Project> {
+  //   const findProject = await this.projectRepo.findOne(project_id, {
+  //     relations: ["users"],
+  //   });
+  //   const findUser = await this.userRepo.getUserById(user_id);
+  //   if (findProject && findUser) {
+  //     // const newUser = User.create(user);
+  //     // await newUser.save();
+  //     // => return [object Promise]
+  //     console.log(findProject.users);
+  //     findProject.users = [...findProject.users, findUser] as any;
+  //     await findProject.save();
+  //     //  user.projects = findProject
+  //   }
+  //   return await this.projectRepo.findOne(project_id, { relations: ["users"] });
+  // }
+
+  // add Manager To Project
   @Mutation(() => Project)
-  async addUserToProject(
+  async setManagerToProject(
     @Arg("idProject", () => ID) project_id: number,
     @Arg("idUser", () => ID) user_id: number
   ): Promise<Project> {
     const findProject = await this.projectRepo.findOne(project_id, {
-      relations: ["users"],
+      relations: ["managers"],
     });
     const findUser = await this.userRepo.getUserById(user_id);
+
     if (findProject && findUser) {
-      // const newUser = User.create(user);
-      // await newUser.save();
-      // => return [object Promise]
-      console.log(findProject.users);
-      findProject.users = [...findProject.users, findUser] as any;
+      if (findProject.users.some((x) => x.id === user_id)) {
+        findProject.users = findProject.users.filter((x) => x.id !== user_id);
+      }
+
+      findProject.managers = [...findProject.managers, findUser] as any;
       await findProject.save();
-      //  user.projects = findProject
     }
-    return await this.projectRepo.findOne(project_id, { relations: ["users"] });
+    return await this.projectRepo.findOne(project_id, {
+      relations: ["managers"],
+    });
   }
 
   // Update
