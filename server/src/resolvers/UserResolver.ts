@@ -60,7 +60,7 @@ export class UserResolver {
 
     let mailOptions = {
       from: "contact.mastermine@gmail.com",
-      to: "preahugo@gmail.com", //userToSave.email,
+      to: "loicpimet@gmail.com", //userToSave.email,
       subject: "Hello ✔", // Subject line
       text: "Hello world?", // plain text body
       html: `<div><a>pppppp</a></div>`, // html body
