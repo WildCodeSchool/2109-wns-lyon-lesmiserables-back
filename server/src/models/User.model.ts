@@ -11,6 +11,13 @@ import {
 import { IsEmailAlreadyExist } from "../utils/IsEmailAlreadyExist";
 import { Project } from "./Project.model";
 
+// export enum Role {
+//   Developer = 0,
+//   Manager = 1,
+//   Admin = 2,
+//   SuperAdmin = 3,
+// }
+
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
@@ -43,6 +50,10 @@ export class User extends BaseEntity {
   @Column()
   secretToken: string;
 
+  @Field({ nullable: true })
+  @Column()
+  role: number = 0;
+
   constructor(projects: Project[]) {
     super();
     this.projects = projects;
@@ -62,6 +73,9 @@ export class UserInput {
   @IsEmail()
   // @IsEmailAlreadyExist({ message: "email already in use" })
   email: string;
+
+  @Field({ nullable: true })
+  role: number = 0;
 
   @Field()
   password: string;

@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@types/randomstring": "^1.1.8",
     "apollo-server": "^3.5.0",
     "argon2": "^0.28.4",
     "class-validator": "^0.13.2",
@@ -12,9 +11,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.7.2",
-    "randomstring": "^1.2.2",
     "reflect-metadata": "^0.1.13",
-    "sqlite3": "^5.0.2",
     "ts-node-dev": "^1.1.8",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.2.41",
