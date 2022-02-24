@@ -54,7 +54,7 @@ export class UserResolver {
     newUser.active = false;
     newUser.secretToken = "";
 
-    const userSaved = await this.userRepo.create(newUser).save();
+    let userSaved = await this.userRepo.create(newUser).save();
     userSaved.secretToken = sign(
       { iss: "mastermine", sub: userSaved.id },
       "MySecretKey",
@@ -64,9 +64,8 @@ export class UserResolver {
     );
     await userSaved.save();
 
-    const html = `Hi,
-      <br/>Thank you for registering!
-      <br/><br/>Please verify you email (only available for 15min) :
+    const html = `Thank you for registering!
+      <br/><br/>To validate your email, click on the link below (only available for 15min) :
       <br/><a href="www.google.com?token=${userSaved.secretToken} target="_blank">Here</a>
       <br/><br/>Have a nice day!
     `;
@@ -74,7 +73,7 @@ export class UserResolver {
     await mailer.sendEmail(
       "contact.mastermine@gmail.com",
       userSaved.email,
-      "Hello ✔",
+      `Hello ${user.username} ✔`,
       html
     );
 
@@ -112,7 +111,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async verifyAccount(@Arg("data") token: string): Promise<User> {
+  async verifyAccount(@Arg("token") token: string): Promise<User> {
     const newUser = await this.userRepo.findOne({
       where: { secretToken: token.trim() },
     });
@@ -125,6 +124,58 @@ export class UserResolver {
     newUser.secretToken = "";
     await newUser.save();
     return newUser;
+  }
+
+  @Mutation(() => User)
+  async forgotPassword(@Arg("email") email: string): Promise<LoginResponse> {
+    let user = await this.userRepo.findOne({
+      where: { email },
+    });
+
+    if (!user) throw new Error("No user found!");
+
+    user.secretToken = sign(
+      { iss: "mastermine", sub: user.id },
+      "MySecretKey",
+      {
+        expiresIn: "15m",
+      }
+    );
+    await user.save();
+
+    const html = `We are here to help you,
+      <br/><br/>To reset your password, click on the link below (only available for 15min) :
+      <br/><a href="www.google.com?token=${user.secretToken} target="_blank">Here</a>
+      <br/><br/>Have a nice day!
+    `;
+
+    await mailer.sendEmail(
+      "contact.mastermine@gmail.com",
+      user.email,
+      `Hello ${user.username} ✔`,
+      html
+    );
+
+    console.log("Please check your email!");
+    return { accessToken: user.secretToken };
+  }
+
+  @Mutation(() => User)
+  async resetPassword(
+    @Arg("token") token: string,
+    @Arg("password") password: string
+  ): Promise<User> {
+    let userTmp = await this.userRepo.findOne({
+      where: { secretToken: token },
+    });
+
+    if (!userTmp) throw new Error("Time limit has been exceeded");
+
+    userTmp.password = await argon2.hash(password);
+    userTmp.secretToken = "";
+
+    const userSaved = await userTmp.save();
+    return userSaved;
   }
 
   // Get User By ID
