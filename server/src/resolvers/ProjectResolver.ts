@@ -86,6 +86,47 @@ export class ProjectResolver {
 
   // add Manager To Project
   @Mutation(() => Project)
+  async addDevToProject(
+    @Arg("idProject", () => ID) project_id: number,
+    @Arg("idUser", () => ID) user_id: number
+    // @Arg("data", () => User) user: User
+  ): Promise<Project> {
+    console.log("helo");
+    // const findProject = await this.getProjectById(project_id);
+    const findProject = await this.projectRepo.findOne(project_id, {
+      relations: ["dev"],
+    });
+    const findUser = await this.userRepo.getUserById(user_id);
+    if (findProject && findUser) {
+      console.log("blibli");
+      findProject.dev = [...findProject.dev, findUser] as any;
+      await findProject.save();
+    }
+    // return await this.projectRepo.findOne(project_id );
+    return await this.projectRepo.findOne(project_id, { relations: ["dev"] });
+  }
+  // @Mutation(() => Project)
+  // async addDevToProject(
+  //   @Arg("idProject", () => ID) project_id: number,
+  //   @Arg("idUser", () => ID) user_id: number
+  // ): Promise<Project> {
+  //   const findProject = await this.projectRepo.findOne(project_id, {
+  //     relations: ["users"],
+  //   });
+  //   const findUser = await this.userRepo.getUserById(user_id);
+  //   if (findProject && findUser) {
+  //     // const newUser = User.create(user);
+  //     // await newUser.save();
+  //     // => return [object Promise]
+  //     console.log(findProject.users);
+  //     findProject.users = [...findProject.users, findUser] as any;
+  //     await findProject.save();
+  //     //  user.projects = findProject
+  //   }
+  //   return await this.projectRepo.findOne(project_id, { relations: ["users"] });
+  // }
+
+  @Mutation(() => Project)
   async setManagerToProject(
     @Arg("idProject", () => ID) project_id: number,
     @Arg("idUser", () => ID) user_id: number
@@ -154,6 +195,8 @@ export class ProjectResolver {
     let findProject = await this.getProjectById(id);
     if (findProject) {
       findProject.title = project.title;
+      // findProject.users = project.user;
+      // findProject.manager = project.manager
       findProject.save();
     }
     return findProject;
