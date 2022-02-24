@@ -15,13 +15,34 @@ import { Project } from "./Project.model";
 @ObjectType()
 @Entity()
 export class Task extends BaseEntity {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Field()
   @Column()
   title: string;
+
+  // @Field()
+  // status: boolean;
+
+  // @Field({ nullable: true })
+  // comment?: string;
+
+  // @Field()
+  // startDate: Date;
+
+  // @Field({ nullable: true })
+  // endDate: Date;
+
+  // @Field({ nullable: true })
+  // duration: string;
+
+  // @Field((type) => CheckList, { nullable: true })
+  // checkList: CheckList;
+
+  // @Field((type) => [Label], { nullable: true })
+  // labels: Label[];
 
   @ManyToOne(() => Project, (project) => project.tasks)
   project: Project;
@@ -31,45 +52,24 @@ export class Task extends BaseEntity {
     this.project = project;
   }
 
-  //   @Field()
-  //   status: boolean;
-
-  //   @Field({ nullable: true })
-  //   comment?: string;
-
-  //   @Field()
-  //   startDate: Date;
-
-  //   @Field({ nullable: true })
-  //   endDate: Date;
-
-  //   @Field({ nullable: true })
-  //   duration: string;
-
-  //   @Field((type) => CheckList, { nullable: true })
-  //   checkList: CheckList;
-
-  //   @Field((type) => [Label], { nullable: true })
-  //   labels: Label[];
-
   // constructor(
   //   title: string
-  //   // status: boolean,
-  //   // comment: string,
-  //   // startDate: Date,
-  //   // endDate: Date,
-  //   // duration: string,
-  //   // checkList: CheckList,
-  //   // labels: Label[]
+  //   status: boolean,
+  //   comment: string,
+  //   startDate: Date,
+  //   endDate: Date,
+  //   duration: string,
+  //   checkList: CheckList,
+  //   labels: Label[]
   // ) {
   //   this.title = title;
-  //   // this.status = status;
-  //   // this.comment = comment;
-  //   // this.startDate = startDate;
-  //   // this.endDate = endDate;
-  //   // this.duration = duration;
-  //   // this.checkList = checkList;
-  //   // this.labels = labels;
+  //   this.status = status;
+  //   this.comment = comment;
+  //   this.startDate = startDate;
+  //   this.endDate = endDate;
+  //   this.duration = duration;
+  //   this.checkList = checkList;
+  //   this.labels = labels;
   // }
 }
 

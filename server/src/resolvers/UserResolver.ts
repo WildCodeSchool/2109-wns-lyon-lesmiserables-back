@@ -1,5 +1,6 @@
 import {
   Arg,
+  Authorized,
   Ctx,
   Field,
   ID,
@@ -7,13 +8,10 @@ import {
   ObjectType,
   Query,
   Resolver,
-  UseMiddleware,
 } from "type-graphql";
 import { getRepository } from "typeorm";
-import { User, UserInput } from "../models/User.model";
+import { SignUpInput, User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
-import { isAuth } from "../utils/isAuth";
-import { MyContext } from "../context/MyContext";
 import { sign } from "jsonwebtoken";
 const mailer = require("../utils/mailer");
 
@@ -27,10 +25,11 @@ class LoginResponse {
 export class UserResolver {
   private userRepo = getRepository(User);
 
-  @Query(() => String)
-  @UseMiddleware(isAuth)
-  async Me(@Ctx() { payload }: MyContext) {
-    return `Your user id : ${payload!.userId}`;
+  @Authorized()
+  @Query(() => User)
+  async getProfile(@Ctx() context: { user: User }): Promise<User | null> {
+    const user = context.user;
+    return await this.userRepo.findOne(user.id);
   }
 
   @Query(() => [User])
@@ -40,7 +39,7 @@ export class UserResolver {
 
   @Mutation(() => User)
   async signUp(
-    @Arg("data", () => UserInput) user: User
+    @Arg("data", () => SignUpInput) user: User
   ): Promise<LoginResponse> {
     const userTmp = await this.userRepo.findOne({
       where: { email: user.email },
@@ -74,13 +73,13 @@ export class UserResolver {
 
     await mailer.sendEmail(
       "contact.mastermine@gmail.com",
-      "preahugo@gmail.com", // userSaved.email
+      userSaved.email,
       "Hello ✔",
       html
     );
 
     console.log("Please check your email!");
-    return { accessToken: newUser.secretToken };
+    return { accessToken: userSaved.secretToken };
   }
 
   @Mutation(() => LoginResponse)
@@ -102,7 +101,7 @@ export class UserResolver {
 
       if (isValid) {
         return {
-          accessToken: sign({ userId: user.id }, "MySecretKey", {
+          accessToken: sign({ sub: user.id }, "MySecretKey", {
             expiresIn: "1h",
           }),
         };
@@ -128,7 +127,7 @@ export class UserResolver {
     return newUser;
   }
 
-  // Get TAsk By ID
+  // Get User By ID
   @Query(() => User, { nullable: true })
   async getUserById(@Arg("id", () => ID) id: number): Promise<User> {
     try {
@@ -141,22 +140,25 @@ export class UserResolver {
   }
 
   // Update
+  // TODO
   @Mutation(() => User)
-  async updateTask(
-    @Arg("data", () => UserInput) user: UserInput,
-    @Arg("id", () => ID) id: number
+  async updateUser(
+    @Arg("data", () => UserInput) user: UserInput
   ): Promise<User> {
-    let findUser = await this.getUserById(id);
+    let findUser = await this.getUserById(user.id);
     if (findUser) {
       findUser.username = user.username;
+      user.password && (findUser.password = await argon2.hash(user.password));
+      user.role && (findUser.role = user.role);
+      findUser.email = user.email;
       findUser.save();
     }
     return findUser;
   }
 
-  // Delete Task
+  // Delete User
   @Mutation(() => Boolean)
-  async deleteTask(@Arg("id", () => ID) id: number): Promise<boolean> {
+  async deleteUser(@Arg("id", () => ID) id: number): Promise<boolean> {
     let findUser = await this.getUserById(id);
     if (findUser) {
       await findUser.remove();
