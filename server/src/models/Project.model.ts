@@ -69,33 +69,19 @@ export class Project extends BaseEntity {
   // user: Promise<User[]>;
   // projects: Promise<Project[]>
 
-  constructor(tasks: Task[], users: User[], manager: User[], dev: User[]) {
+ 
+  @Field(() => [User], { nullable: true })
+  @ManyToMany((type) => User, (user) => user.projects)
+  @JoinTable()
+  managers: User[];
+
+  constructor(tasks: Task[], users: User[], managers: User[], dev: User[]) {
     super();
     this.tasks = tasks;
     this.users = users;
-    // this.manager = manager;
+    this.managers = managers;
     this.dev = dev
   }
-
-  // constructor(
-  //   title: string,
-  //   // description: string,
-  //   // status: boolean,
-  //   // startDate: Date,
-  //   // endDate: Date,
-  //   // estimatedEndDate: Date,
-  //   // photo: string,
-  //   tasks: Task[]
-  // ) {
-  //   this.title = title;
-  //   // this.description = description;
-  //   // this.status = status;
-  //   // this.startDate = startDate;
-  //   // this.endDate = endDate;
-  //   // this.estimatedEndDate = estimatedEndDate;
-  //   // this.photo = photo;
-  //   this.tasks = tasks;
-  // }
 }
 
 @InputType()
@@ -117,4 +103,6 @@ export class ProjectInput {
   
   @Field(() => [UserInput], { nullable: true })
   dev: UserInput[];
+  @Field(() => [UserInput], { nullable: true })
+  managers: User[];
 }
