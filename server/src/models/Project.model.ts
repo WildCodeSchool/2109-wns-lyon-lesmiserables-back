@@ -60,6 +60,11 @@ export class Project extends BaseEntity {
   @JoinTable()
   managers: User[];
 
+  @Field(() => [User], { nullable: true })
+  @ManyToMany((type) => User, (user) => user.projects)
+  @JoinTable()
+  dev: User[];
+
   constructor(tasks: Task[], users: User[], managers: User[]) {
     super();
     this.tasks = tasks;
