@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { IsEmail, Length } from "class-validator";
 import { Field, ID, InputType, ObjectType } from "type-graphql";
 import {
@@ -12,6 +13,7 @@ import {
 import { IsEmailAlreadyExist } from "../utils/IsEmailAlreadyExist";
 import { IsUsernameAlreadyExist } from "../utils/IsUsernameAlreadyExist";
 import { Project } from "./Project.model";
+import { Task } from "./Task.model";
 
 // export enum Role {
 //   Developer = 0,
@@ -24,7 +26,7 @@ import { Project } from "./Project.model";
 @Entity()
 export class User extends BaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment")
   id: number;
 
   @Field()
@@ -44,16 +46,21 @@ export class User extends BaseEntity {
   @JoinTable()
   projects: Project[];
 
+  @Field(() => [Task], { nullable: true })
+  @ManyToMany((type) => Task, (task) => task.users)
+  @JoinTable()
+  tasks: Task[];
+
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   active: boolean = false;
 
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   secretToken: string;
 
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   role: number = 0;
 
   constructor(projects: Project[]) {
