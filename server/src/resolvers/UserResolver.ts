@@ -10,7 +10,7 @@ import {
   Resolver,
 } from "type-graphql";
 import { getRepository } from "typeorm";
-import { User, UserInput } from "../models/User.model";
+import { SignUpInput, User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
 import { sign } from "jsonwebtoken";
 const mailer = require("../utils/mailer");
@@ -39,7 +39,7 @@ export class UserResolver {
 
   @Mutation(() => User)
   async signUp(
-    @Arg("data", () => UserInput) user: User
+    @Arg("data", () => SignUpInput) user: User
   ): Promise<LoginResponse> {
     const userTmp = await this.userRepo.findOne({
       where: { email: user.email },
@@ -140,6 +140,7 @@ export class UserResolver {
   }
 
   // Update
+  // TODO
   @Mutation(() => User)
   async updateUser(
     @Arg("data", () => UserInput) user: UserInput

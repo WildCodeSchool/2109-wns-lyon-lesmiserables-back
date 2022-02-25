@@ -55,21 +55,12 @@ export class Project extends BaseEntity {
   users: User[];
   // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
 
-  // @Field(() => [User], { nullable: true })
-  // @Column()
-  // // @ManyToMany((type) => User, (user) => user.projects)
-  // // @JoinTable()
-  // manager: User[];
-
   @Field(() => [User], { nullable: true })
   // @Column()
   @ManyToMany((type) => User, (user) => user.projects)
   @JoinTable()
   dev: User[];
-  // user: Promise<User[]>;
-  // projects: Promise<Project[]>
 
- 
   @Field(() => [User], { nullable: true })
   @ManyToMany((type) => User, (user) => user.projects)
   @JoinTable()
@@ -80,7 +71,7 @@ export class Project extends BaseEntity {
     this.tasks = tasks;
     this.users = users;
     this.managers = managers;
-    this.dev = dev
+    this.dev = dev;
   }
 }
 
@@ -98,11 +89,9 @@ export class ProjectInput {
   @Field(() => [UserInput], { nullable: true })
   user: UserInput[];
 
-  // @Field(() => [UserInput], { nullable: true })
-  // manager: UserInput[];
-  
   @Field(() => [UserInput], { nullable: true })
   dev: UserInput[];
+
   @Field(() => [UserInput], { nullable: true })
-  managers: User[];
+  managers: UserInput[];
 }

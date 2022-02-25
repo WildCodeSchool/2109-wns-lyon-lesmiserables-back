@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { IsEmailAlreadyExist } from "../utils/IsEmailAlreadyExist";
+import { IsUsernameAlreadyExist } from "../utils/IsUsernameAlreadyExist";
 import { Project } from "./Project.model";
 
 // export enum Role {
@@ -72,7 +73,6 @@ export class UserInput {
 
   @Field()
   @IsEmail()
-  // @IsEmailAlreadyExist({ message: "email already in use" })
   email: string;
 
   @Field({ nullable: true })
@@ -83,9 +83,22 @@ export class UserInput {
 }
 
 @InputType()
-export class LoginInput {
+export class SignUpInput {
+  @Field((type) => ID, { nullable: true })
+  id: number;
+
   @Field()
+  @Length(1, 255)
+  @IsUsernameAlreadyExist({ message: "Username already in use" })
+  username: string;
+
+  @Field()
+  @IsEmail()
+  @IsEmailAlreadyExist({ message: "Email already in use" })
   email: string;
+
+  @Field({ nullable: true })
+  role: number = 0;
 
   @Field()
   password: string;
