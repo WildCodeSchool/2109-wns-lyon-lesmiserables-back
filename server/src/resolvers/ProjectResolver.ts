@@ -18,6 +18,26 @@ export class ProjectResolver {
     return await this.projectRepo.find();
   }
 
+  @Query(() => Project, { nullable: true })
+  async getDevInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["dev"] });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  @Query(() => Project, { nullable: true })
+  async getManagersInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["managers"] });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   // Get Project By ID
   @Query(() => Project, { nullable: true })
   async getProjectById(@Arg("id", () => ID) id: number): Promise<Project> {
