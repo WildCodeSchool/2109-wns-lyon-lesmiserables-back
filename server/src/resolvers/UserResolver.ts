@@ -112,29 +112,6 @@ export class UserResolver {
     } else {
       return null;
     }
-
-    // try {
-    //   const user = await this.userRepo.findOne({ where: { email } });
-    //   if (!user) {
-    //     throw new Error("No user found!");
-    //   }
-
-    //   const isValid = await argon2.verify(user.password, password);
-
-    //   if (!isValid) {
-    //     throw new Error("Email or password incorrect !");
-    //   }
-
-    //   if (isValid) {
-    //     return {
-    //       accessToken: sign({ sub: user.id }, process.env.JWT_SECRET, {
-    //         expiresIn: "1h",
-    //       }),
-    //     };
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-    // }
   }
 
   @Mutation(() => User)
