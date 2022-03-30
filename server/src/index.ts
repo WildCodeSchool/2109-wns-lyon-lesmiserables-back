@@ -5,9 +5,8 @@ import { ProjectResolver } from "./resolvers/ProjectResolver";
 import { createConnection } from "typeorm";
 import { TaskResolver } from "./resolvers/TaskResolver";
 import { UserResolver } from "./resolvers/UserResolver";
-import { getRepository } from "typeorm";
-import { User } from "./models/User.model";
 import { customAuthChecker } from "./utils/auth";
+const cookie = require("cookie");
 
 const PORT = process.env.PORT || 4000;
 
@@ -34,10 +33,31 @@ async function bootstrap() {
   // Create the GraphQL server
   const server = new ApolloServer({
     schema,
-    context: ({ req }) => {
+    context: ({ req, res }) => {
+      const authorization = req.headers.authorization;
+
+      let cookies;
+      let parsedCookies;
+
+      if (req.headers.cookie) {
+        cookies = req.headers.cookie;
+        parsedCookies = cookie.parse(cookies);
+      }
+
+      let token = null;
+
+      if (authorization) {
+        token = authorization?.startsWith("Bearer ")
+          ? authorization.replace("Bearer ", "")
+          : authorization;
+      } else if (parsedCookies && parsedCookies.token) {
+        token = parsedCookies.token;
+      }
+
       return {
-        token: req.headers.authorization,
+        token,
         user: null,
+        res,
       };
     },
   });

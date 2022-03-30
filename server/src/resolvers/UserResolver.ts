@@ -12,7 +12,7 @@ import {
 import { getRepository } from "typeorm";
 import { SignUpInput, User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
-import { sign } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 const mailer = require("../utils/mailer");
 
 @ObjectType()
@@ -55,7 +55,7 @@ export class UserResolver {
     newUser.secretToken = "";
 
     let userSaved = await this.userRepo.create(newUser).save();
-    userSaved.secretToken = sign(
+    userSaved.secretToken = jwt.sign(
       { iss: "mastermine", sub: userSaved.id },
       "MySecretKey",
       {
@@ -81,32 +81,36 @@ export class UserResolver {
     return { accessToken: userSaved.secretToken };
   }
 
-  @Mutation(() => LoginResponse)
+  @Mutation(() => String, { nullable: true })
   async signIn(
+    @Ctx() ctx,
     @Arg("email") email: string,
     @Arg("password") password: string
-  ): Promise<LoginResponse> {
-    try {
-      const user = await this.userRepo.findOne({ where: { email } });
-      if (!user) {
-        throw new Error("No user found!");
-      }
+  ): Promise<String> {
+    const user = await this.userRepo.findOne({ where: { email } });
 
-      const isValid = await argon2.verify(user.password, password);
-
-      if (!isValid) {
-        throw new Error("Email or password incorrect !");
-      }
-
-      if (isValid) {
-        return {
-          accessToken: sign({ sub: user.id }, "MySecretKey", {
+    if (user) {
+      try {
+        if (await argon2.verify(user.password, password)) {
+          // password match
+          const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
-          }),
-        };
+          });
+
+          // set in cookie
+          ctx.res.cookie("token", token);
+
+          // and return the token for localstorage/asyncstorage if needed
+          return token;
+        } else {
+          return null;
+        }
+      } catch (err) {
+        console.log(err);
+        return null;
       }
-    } catch (err) {
-      console.log(err);
+    } else {
+      return null;
     }
   }
 
@@ -134,7 +138,7 @@ export class UserResolver {
 
     if (!user) throw new Error("No user found!");
 
-    user.secretToken = sign(
+    user.secretToken = jwt.sign(
       { iss: "mastermine", sub: user.id },
       "MySecretKey",
       {

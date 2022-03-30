@@ -1,4 +1,4 @@
-import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
 import { Project, ProjectInput } from "../models/Project.model";
 import { Task, TaskInput, TaskStatus } from "../models/Task.model";
@@ -13,6 +13,7 @@ export class ProjectResolver {
   private userRepo = new UserResolver();
 
   // Get all projects
+  @Authorized()
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
     return await this.projectRepo.find({ relations: ["managers", "dev"] });
