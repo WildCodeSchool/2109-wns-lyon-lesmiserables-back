@@ -10,7 +10,7 @@ import { UserResolver } from "./UserResolver";
 export class ProjectResolver {
   private projectRepo = getRepository(Project);
   private taskResolver = new TaskResolver();
-  private userRepo = new UserResolver();
+  private userRepo = new UserResolver(); 
 
   // Get all projects
   @Authorized()
