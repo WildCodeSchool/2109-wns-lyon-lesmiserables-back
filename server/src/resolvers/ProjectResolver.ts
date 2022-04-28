@@ -9,7 +9,7 @@ import { UserResolver } from "./UserResolver";
 @Resolver(Project)
 export class ProjectResolver {
   private projectRepo = getRepository(Project);
-  private taskController = new TaskResolver();
+  private taskResolver = new TaskResolver();
   private userRepo = new UserResolver();
 
   // Get all projects
@@ -17,6 +17,26 @@ export class ProjectResolver {
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
     return await this.projectRepo.find({ relations: ["managers", "dev"] });
+  }
+
+  @Query(() => Project, { nullable: true })
+  async getDevInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["dev"] });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  @Query(() => Project, { nullable: true })
+  async getManagersInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["managers"] });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   // Get Project By ID
@@ -49,6 +69,60 @@ export class ProjectResolver {
     return projectSaved;
   }
 
+
+  // @Mutation(() => Project)
+  // async addTaskToProject(
+  //   @Arg("idProject", () => ID) project_id: number,
+  //   @Arg("idTask", () => ID) task_id: number
+  //   // @Arg("data", () => User) user: User
+  // ): Promise<Project> {
+  //   console.log("helo");
+  //   // const findProject = await this.getProjectById(project_id);
+  //   const findProject = await this.projectRepo.findOne(project_id, {
+  //     relations: ["tasks"],
+  //   });
+  //   const findUser = await this.taskResolver.getTaskById(task_id);
+  //   if (findProject && findUser) {
+  //     console.log("blibli");
+  //     findProject.tasks = [...findProject.tasks, findUser] as any;
+  //     await findProject.save();
+  //   }
+  //   // return await this.projectRepo.findOne(project_id );
+  //   return await this.projectRepo.findOne(project_id, { relations: ["tasks"] });
+  // }
+
+
+  // @Mutation(() => Project)
+  // async addTaskToProject(
+  //   @Arg("idProject", () => ID) id: number,
+  //   @Arg("data", () => TaskInput) task: Task
+  // ): Promise<Project> {
+  //   const findProject = await this.getProjectById(id);
+  //   if (findProject) {
+  //     task.project = findProject;
+  //     if (!task.status) task.status = TaskStatus.Waiting;
+  //     const newTask = Task.create(task);
+  //     await newTask.save();
+  //   }
+  //   return await this.projectRepo.findOne(id, {
+  //     relations: ["tasks", "users", "dev", "managers"],
+  //   });
+  // }
+
+  // @Mutation(() => Project)
+  // async addTaskToProject(
+  //   @Arg("id", () => ID) id: number,
+  //   @Arg("data", () => TaskInput) task: Task
+  // ): Promise<Project> {
+  //   const findProject = await this.getProjectById(id);
+  //   if (findProject) {
+  //     task.project = findProject;
+  //     const newTask = Task.create(task);
+  //     await newTask.save();
+  //   }
+  //   return await this.projectRepo.findOne(id);
+  // }
+
   @Mutation(() => Project)
   async addTaskToProject(
     @Arg("idProject", () => ID) id: number,
@@ -64,6 +138,7 @@ export class ProjectResolver {
       relations: ["tasks", "users", "dev", "managers"],
     });
   }
+
 
   // @Mutation(() => Project)
   // async addUserToProject(
