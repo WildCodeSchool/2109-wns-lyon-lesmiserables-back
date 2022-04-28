@@ -1,0 +1,12 @@
+{
+  "smtpOptions": {
+    "service": "gmail",
+    "auth": {
+      "user": "contact.mastermine@gmail.com",
+      "pass": "gxblrgunjslufoin"
+    },
+    "tls": {
+      "rejectUnauthorized": false
+    }
+  }
+}
