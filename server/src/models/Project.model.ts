@@ -41,10 +41,6 @@ export class Project extends BaseEntity {
   //   @Field({ nullable: true })
   //   photo: string;
 
-  // @Field(() => [Task], { nullable: true })
-  // @Column()
-  // tasks: Task[];
-
   @Field(() => [Task], { nullable: true })
   @OneToMany(() => Task, (task) => task.project) // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
   tasks: Task[];
@@ -56,7 +52,6 @@ export class Project extends BaseEntity {
   // eager => "le plus tot possible" lazy => le plus opti => ca devient des promesses
 
   @Field(() => [User], { nullable: true })
-  // @Column()
   @ManyToMany((type) => User, (user) => user.projects)
   @JoinTable()
   dev: User[];
