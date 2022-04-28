@@ -3,9 +3,9 @@ version: "3"
 services:
   api:
     image: dochugoker/mmserver
-    build:
-      context: ./server
-      dockerfile: dev.dockerfile
+    # build:
+    #   context: ./server
+    #   dockerfile: dev.dockerfile
     ports:
       - 4000:4000
     environment:
