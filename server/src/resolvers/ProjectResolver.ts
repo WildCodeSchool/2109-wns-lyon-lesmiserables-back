@@ -1,7 +1,7 @@
-import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
 import { Project, ProjectInput } from "../models/Project.model";
-import { Task, TaskInput } from "../models/Task.model";
+import { Task, TaskInput, TaskStatus } from "../models/Task.model";
 import { User, UserInput } from "../models/User.model";
 import { TaskResolver } from "./TaskResolver";
 import { UserResolver } from "./UserResolver";
@@ -13,6 +13,7 @@ export class ProjectResolver {
   private userRepo = new UserResolver();
 
   // Get all projects
+  @Authorized()
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
     return await this.projectRepo.find({ relations: ["managers", "dev"] });
@@ -42,7 +43,6 @@ export class ProjectResolver {
   @Query(() => Project, { nullable: true })
   async getProjectById(@Arg("id", () => ID) id: number): Promise<Project> {
     try {
-      // préciser la relation
       const proj = await this.projectRepo.findOne(id, { relations: ["tasks"] });
       if (!proj) return null;
       return proj;
@@ -54,7 +54,7 @@ export class ProjectResolver {
   // Add Project
   @Mutation(() => Project)
   async addProject(
-    @Arg("data", () => ProjectInput) project: ProjectInput,
+    @Arg("data", () => ProjectInput) project: Project,
     @Arg("idUser", () => ID) user_id: number
   ): Promise<Project> {
     const user = await this.userRepo.getUserById(user_id);
@@ -68,6 +68,7 @@ export class ProjectResolver {
     const projectSaved = await this.projectRepo.create(newProject).save();
     return projectSaved;
   }
+
 
   // @Mutation(() => Project)
   // async addTaskToProject(
@@ -121,6 +122,23 @@ export class ProjectResolver {
   //   }
   //   return await this.projectRepo.findOne(id);
   // }
+
+  @Mutation(() => Project)
+  async addTaskToProject(
+    @Arg("idProject", () => ID) id: number,
+    @Arg("data", () => TaskInput) task: Task
+  ): Promise<Project> {
+    const findProject = await this.getProjectById(id);
+    if (findProject) {
+      task.project = findProject;
+      if (!task.status) task.status = TaskStatus.Waiting;
+      await Task.create(task).save();
+    }
+    return await this.projectRepo.findOne(id, {
+      relations: ["tasks", "users", "dev", "managers"],
+    });
+  }
+
 
   // @Mutation(() => Project)
   // async addUserToProject(

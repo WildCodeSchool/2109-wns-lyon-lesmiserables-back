@@ -8,6 +8,8 @@ services:
       dockerfile: prod.dockerfile
     ports:
       - 4000:4000
+    environment:
+      - JWT_SECRET=supersecretcode
     command: npm start
     # volumes:
     #   - ./server/dist/:/app/dist
