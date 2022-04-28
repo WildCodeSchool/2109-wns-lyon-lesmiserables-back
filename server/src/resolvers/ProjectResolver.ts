@@ -1,7 +1,7 @@
 import { Arg, Authorized, ID, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
 import { Project, ProjectInput } from "../models/Project.model";
-import { Task, TaskInput, TaskStatus } from "../models/Task.model";
+import { Task, TaskInput } from "../models/Task.model";
 import { User, UserInput } from "../models/User.model";
 import { TaskResolver } from "./TaskResolver";
 import { UserResolver } from "./UserResolver";
@@ -123,21 +123,21 @@ export class ProjectResolver {
   //   return await this.projectRepo.findOne(id);
   // }
 
-  @Mutation(() => Project)
-  async addTaskToProject(
-    @Arg("idProject", () => ID) id: number,
-    @Arg("data", () => TaskInput) task: Task
-  ): Promise<Project> {
-    const findProject = await this.getProjectById(id);
-    if (findProject) {
-      task.project = findProject;
-      if (!task.status) task.status = TaskStatus.Waiting;
-      await Task.create(task).save();
-    }
-    return await this.projectRepo.findOne(id, {
-      relations: ["tasks", "users", "dev", "managers"],
-    });
-  }
+  // @Mutation(() => Project)
+  // async addTaskToProject(
+  //   @Arg("idProject", () => ID) id: number,
+  //   @Arg("data", () => TaskInput) task: Task
+  // ): Promise<Project> {
+  //   const findProject = await this.getProjectById(id);
+  //   if (findProject) {
+  //     task.project = findProject;
+  //     if (!task.status) task.status = TaskStatus.Waiting;
+  //     await Task.create(task).save();
+  //   }
+  //   return await this.projectRepo.findOne(id, {
+  //     relations: ["tasks", "users", "dev", "managers"],
+  //   });
+  // }
 
 
   // @Mutation(() => Project)
