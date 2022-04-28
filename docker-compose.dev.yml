@@ -12,8 +12,8 @@ services:
       - JWT_SECRET=supersecretcode
     command: npm run start
     volumes:
-      - ./server/src:/app/src
-      - ./server/ormconfig.json:/app/ormconfig.json
+      - ./server/src:/mastermine/dev/server/src
+      - ./server/ormconfig.json:/mastermine/dev/server/ormconfig.json
     depends_on:
       db:
         condition: service_healthy
