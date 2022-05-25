@@ -26,14 +26,21 @@ export class UserResolver {
   private userRepo = getRepository(User);
 
   @Authorized()
+  @Query(() => User, { nullable: true })
+  async getProfile(@Ctx() ctx: { user: User }): Promise<User> {
+    return ctx.user;
+  }
+
+  @Authorized()
   @Query(() => User)
-  async getProfile(@Ctx() context: { user: User }): Promise<User | null> {
-    const user = context.user;
-    return await this.userRepo.findOne(user.id);
+  async getUserInfo(@Ctx() ctx): Promise<User> {
+    return await this.userRepo.findOne(ctx.user.id, {
+      relations: ["projects"],
+    });
   }
 
   @Query(() => [User])
-  async getUser(): Promise<User[]> {
+  async getUsers(): Promise<User[]> {
     return await this.userRepo.find();
   }
 
