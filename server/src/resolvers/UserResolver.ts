@@ -69,7 +69,7 @@ export class UserResolver {
       <br/><a href="www.google.com?token=${userSaved.secretToken} target="_blank">Here</a>
       <br/><br/>Have a nice day!
     `;
- 
+
     await mailer.sendEmail(
       "contact.mastermine@gmail.com",
       userSaved.email,
@@ -127,6 +127,23 @@ export class UserResolver {
     newUser.active = true;
     newUser.secretToken = "";
     await newUser.save();
+    return newUser;
+  }
+
+  @Mutation(() => User)
+  async isAlreadyConnected(@Arg("token") token: string): Promise<User> {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded) throw new Error("No user found");
+    console.log(decoded);
+    const newUser = await this.userRepo.findOne({
+      where: { id: decoded.sub },
+    });
+
+    if (!newUser) {
+      throw new Error("No user found");
+    }
+
+    newUser.active = true;
     return newUser;
   }
 

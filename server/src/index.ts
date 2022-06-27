@@ -6,6 +6,7 @@ import { createConnection } from "typeorm";
 import { TaskResolver } from "./resolvers/TaskResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { customAuthChecker } from "./utils/auth";
+import "dotenv/config";
 const cookie = require("cookie");
 
 const PORT = process.env.PORT || 4000;
