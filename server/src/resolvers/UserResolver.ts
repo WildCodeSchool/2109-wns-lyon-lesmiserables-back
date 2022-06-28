@@ -27,6 +27,12 @@ export class UserResolver {
 
   @Authorized()
   @Query(() => User, { nullable: true })
+  async getTest1000(@Ctx() ctx: { user: User }): Promise<User> {
+    return ctx.user;
+  }
+
+  @Authorized()
+  @Query(() => User, { nullable: true })
   async getProfile(@Ctx() ctx: { user: User }): Promise<User> {
     return ctx.user;
   }
@@ -45,15 +51,17 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async signUp(
-    @Arg("data", () => SignUpInput) user: User
-  ): Promise<LoginResponse> {
+  async signUp(@Arg("data", () => SignUpInput) user: User): Promise<boolean> {
     const userTmp = await this.userRepo.findOne({
       where: { email: user.email },
     });
 
     if (userTmp) {
-      throw new Error("Account already exists !");
+      if (!userTmp.active) {
+        throw new Error("Check your email to validate your account.");
+      } else {
+        throw new Error("Account already exists !");
+      }
     }
 
     let newUser = user;
@@ -85,18 +93,18 @@ export class UserResolver {
     );
 
     console.log("Please check your email!");
-    return { accessToken: userSaved.secretToken };
+    return true;
   }
 
-  @Mutation(() => String, { nullable: true })
+  @Mutation(() => LoginResponse, { nullable: true })
   async signIn(
     @Ctx() ctx,
     @Arg("email") email: string,
     @Arg("password") password: string
-  ): Promise<String> {
+  ): Promise<LoginResponse> {
     const user = await this.userRepo.findOne({ where: { email } });
 
-    if (user) {
+    if (user && user.active) {
       try {
         if (await argon2.verify(user.password, password)) {
           // password match
@@ -108,7 +116,7 @@ export class UserResolver {
           ctx.res.cookie("token", token);
 
           // and return the token for localstorage/asyncstorage if needed
-          return token;
+          return { accessToken: token };
         } else {
           return null;
         }
@@ -116,6 +124,8 @@ export class UserResolver {
         console.log(err);
         return null;
       }
+    } else if (user && !user.active) {
+      throw new Error("Check your email to validate your account.");
     } else {
       return null;
     }
