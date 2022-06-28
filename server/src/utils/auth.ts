@@ -6,7 +6,6 @@ export const customAuthChecker = async (
   { root, args, context, info },
   roles
 ) => {
-  console.log("laaa");
   if (context.token) {
     try {
       const decoded: any = jwt.verify(context.token, process.env.JWT_SECRET);
