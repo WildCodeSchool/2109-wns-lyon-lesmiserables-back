@@ -3,17 +3,17 @@ version: "3"
 services:
   api:
     image: dochugoker/mmserver
-    build:
-      context: ./server
-      dockerfile: dev.dockerfile
+    # build:
+    #   context: ./server
+    #   dockerfile: dev.dockerfile
     ports:
       - 4000:4000
     environment:
       - JWT_SECRET=supersecretcode
     command: npm run start
     volumes:
-      - ./server/src:/app/src
-      - ./server/ormconfig.json:/app/ormconfig.json
+      - ./server/src:/mastermine/dev/src
+      - ./server/ormconfig.json:/mastermine/dev/ormconfig.json
     depends_on:
       db:
         condition: service_healthy

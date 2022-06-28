@@ -84,7 +84,7 @@ export class UserResolver {
       <br/><a href="www.google.com?token=${userSaved.secretToken} target="_blank">Here</a>
       <br/><br/>Have a nice day!
     `;
-
+ 
     await mailer.sendEmail(
       "contact.mastermine@gmail.com",
       userSaved.email,

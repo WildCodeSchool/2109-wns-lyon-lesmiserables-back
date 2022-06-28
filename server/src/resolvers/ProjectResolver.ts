@@ -10,18 +10,41 @@ import {
 import { getRepository } from "typeorm";
 import { Project, ProjectInput } from "../models/Project.model";
 import { Task, TaskInput, TaskStatus } from "../models/Task.model";
+import { User, UserInput } from "../models/User.model";
+import { TaskResolver } from "./TaskResolver";
 import { UserResolver } from "./UserResolver";
 
 @Resolver(Project)
 export class ProjectResolver {
   private projectRepo = getRepository(Project);
   private userRepo = new UserResolver();
+  private taskResolver = new TaskResolver();
 
   // Get all projects
   @Authorized()
   @Query(() => [Project])
   async getProjects(): Promise<Project[]> {
     return await this.projectRepo.find({ relations: ["managers", "dev"] });
+  }
+
+  @Query(() => Project, { nullable: true })
+  async getDevInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["dev"] });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  @Query(() => Project, { nullable: true })
+  async getManagersInProject(@Arg("id", () => ID) id: number): Promise<any> {
+    try {
+      // préciser la relation
+      return await this.projectRepo.findOne(id, { relations: ["managers"] });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   // Get Project By ID
