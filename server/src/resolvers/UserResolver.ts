@@ -12,7 +12,7 @@ import {
 import { getRepository } from "typeorm";
 import { SignUpInput, User, UserInput } from "../models/User.model";
 import * as argon2 from "argon2";
-import { sign } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 const mailer = require("../utils/mailer");
 
 @ObjectType()
@@ -26,27 +26,42 @@ export class UserResolver {
   private userRepo = getRepository(User);
 
   @Authorized()
+  @Query(() => User, { nullable: true })
+  async getTest1000(@Ctx() ctx: { user: User }): Promise<User> {
+    return ctx.user;
+  }
+
+  @Authorized()
+  @Query(() => User, { nullable: true })
+  async getProfile(@Ctx() ctx: { user: User }): Promise<User> {
+    return ctx.user;
+  }
+
+  @Authorized()
   @Query(() => User)
-  async getProfile(@Ctx() context: { user: User }): Promise<User | null> {
-    const user = context.user;
-    return await this.userRepo.findOne(user.id);
+  async getUserInfo(@Ctx() ctx): Promise<User> {
+    return await this.userRepo.findOne(ctx.user.id, {
+      relations: ["projects"],
+    });
   }
 
   @Query(() => [User])
-  async getUser(): Promise<User[]> {
+  async getUsers(): Promise<User[]> {
     return await this.userRepo.find();
   }
 
   @Mutation(() => User)
-  async signUp(
-    @Arg("data", () => SignUpInput) user: User
-  ): Promise<LoginResponse> {
+  async signUp(@Arg("data", () => SignUpInput) user: User): Promise<boolean> {
     const userTmp = await this.userRepo.findOne({
       where: { email: user.email },
     });
 
     if (userTmp) {
-      throw new Error("Account already exists !");
+      if (!userTmp.active) {
+        throw new Error("Check your email to validate your account.");
+      } else {
+        throw new Error("Account already exists !");
+      }
     }
 
     let newUser = user;
@@ -55,7 +70,7 @@ export class UserResolver {
     newUser.secretToken = "";
 
     let userSaved = await this.userRepo.create(newUser).save();
-    userSaved.secretToken = sign(
+    userSaved.secretToken = jwt.sign(
       { iss: "mastermine", sub: userSaved.id },
       "MySecretKey",
       {
@@ -69,7 +84,7 @@ export class UserResolver {
       <br/><a href="www.google.com?token=${userSaved.secretToken} target="_blank">Here</a>
       <br/><br/>Have a nice day!
     `;
-
+ 
     await mailer.sendEmail(
       "contact.mastermine@gmail.com",
       userSaved.email,
@@ -78,35 +93,41 @@ export class UserResolver {
     );
 
     console.log("Please check your email!");
-    return { accessToken: userSaved.secretToken };
+    return true;
   }
 
-  @Mutation(() => LoginResponse)
+  @Mutation(() => LoginResponse, { nullable: true })
   async signIn(
+    @Ctx() ctx,
     @Arg("email") email: string,
     @Arg("password") password: string
   ): Promise<LoginResponse> {
-    try {
-      const user = await this.userRepo.findOne({ where: { email } });
-      if (!user) {
-        throw new Error("No user found!");
-      }
+    const user = await this.userRepo.findOne({ where: { email } });
 
-      const isValid = await argon2.verify(user.password, password);
-
-      if (!isValid) {
-        throw new Error("Email or password incorrect !");
-      }
-
-      if (isValid) {
-        return {
-          accessToken: sign({ sub: user.id }, "MySecretKey", {
+    if (user && user.active) {
+      try {
+        if (await argon2.verify(user.password, password)) {
+          // password match
+          const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
-          }),
-        };
+          });
+
+          // set in cookie
+          ctx.res.cookie("token", token);
+
+          // and return the token for localstorage/asyncstorage if needed
+          return { accessToken: token };
+        } else {
+          return null;
+        }
+      } catch (err) {
+        console.log(err);
+        return null;
       }
-    } catch (err) {
-      console.log(err);
+    } else if (user && !user.active) {
+      throw new Error("Check your email to validate your account.");
+    } else {
+      return null;
     }
   }
 
@@ -134,7 +155,7 @@ export class UserResolver {
 
     if (!user) throw new Error("No user found!");
 
-    user.secretToken = sign(
+    user.secretToken = jwt.sign(
       { iss: "mastermine", sub: user.id },
       "MySecretKey",
       {
